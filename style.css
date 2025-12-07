@@ -1,0 +1,103 @@
+:root {
+    /* Couleurs de base inspirées par les tons africains et les couleurs primaires */
+    --c-primaire: #FF5733; /* Orange vif */
+    --c-secondaire: #33A1FF; /* Bleu ciel */
+    --c-fond-clair: #F0F8FF; /* Blanc cassé pour le fond */
+    --c-texte-fonce: #333333;
+}
+
+/* Réinitialisation de base */
+body {
+    font-family: 'Arial', sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: var(--c-fond-clair);
+    color: var(--c-texte-fonce);
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+header {
+    background-color: var(--c-primaire);
+    color: white;
+    padding: 15px 0;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+h1 {
+    font-size: 2.5em; /* Grand titre pour l'attrait */
+    margin: 0;
+    text-shadow: 2px 2px var(--c-secondaire);
+}
+
+p {
+    margin: 5px 0;
+}
+
+/* Zone de Jeu Principale */
+#jeu-couleur {
+    flex-grow: 1; /* Prend l'espace restant */
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer; /* Indique l'interactivité */
+    transition: background-color 0.5s ease;
+    padding: 20px;
+}
+
+#zone-affichage {
+    width: 90%;
+    max-width: 600px;
+    height: 300px;
+    margin-bottom: 30px;
+    border-radius: 20px;
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+    border: 5px solid var(--c-texte-fonce); /* Bordure épaisse pour un effet ludique */
+    transition: transform 0.2s ease;
+}
+
+/* Effet au survol/clic pour un retour visuel */
+#jeu-couleur:active #zone-affichage {
+    transform: scale(0.98);
+    box-shadow: 0 5px 10px rgba(0, 0, 0, 0.2);
+}
+
+/* Affichage du Nom de la Couleur */
+#nom-couleur-container {
+    background-color: white;
+    padding: 15px 30px;
+    border-radius: 15px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.15);
+    border: 3px solid var(--c-primaire);
+}
+
+#nom-couleur {
+    font-size: 3em; /* Très grande taille pour la lisibilité par les petits */
+    font-weight: bold;
+    color: var(--c-texte-fonce);
+    margin: 0;
+}
+
+/* Footer */
+footer {
+    background-color: var(--c-secondaire);
+    color: white;
+    padding: 10px 0;
+    font-size: 0.9em;
+}
+
+/* Règle pour les petits écrans (téléphones) */
+@media (max-width: 600px) {
+    h1 {
+        font-size: 2em;
+    }
+    #nom-couleur {
+        font-size: 2em;
+    }
+    #zone-affichage {
+        height: 200px;
+    }
+}
