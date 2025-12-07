@@ -1,77 +1,185 @@
-// Liste des couleurs avec leurs codes hexadécimaux pour le design
-// et des noms clairs et faciles à prononcer.
-const couleurs = [
-    { nom: "ROUGE", hex: "#E74C3C" },    // Rouge
-    { nom: "BLEU", hex: "#3498DB" },     // Bleu ciel
-    { nom: "VERT", hex: "#2ECC71" },     // Vert pomme
-    { nom: "JAUNE", hex: "#F1C40F" },    // Jaune vif
-    { nom: "ORANGE", hex: "#E67E22" },   // Orange
-    { nom: "VIOLET", hex: "#9B59B6" },   // Violet
-    { nom: "ROSE", hex: "#FFC0CB" },     // Rose clair
-    { nom: "MARRON", hex: "#8B4513" }    // Marron terre
-];
+// --- 1. Base de Données des Couleurs (Niveaux) ---
+const couleursData = {
+    // Niveau 1: Débutant (2-4 ans) - Couleurs primaires et faciles
+    debutant: [
+        { fr: "ROUGE", en: "RED", hex: "#E74C3C" },
+        { fr: "BLEU", en: "BLUE", hex: "#3498DB" },
+        { fr: "VERT", en: "GREEN", hex: "#2ECC71" },
+        { fr: "JAUNE", en: "YELLOW", hex: "#F1C40F" },
+    ],
+    // Niveau 2: Intermédiaire (5-6 ans) - Couleurs secondaires et de base
+    intermediaire: [
+        { fr: "ORANGE", en: "ORANGE", hex: "#E67E22" },
+        { fr: "VIOLET", en: "PURPLE", hex: "#9B59B6" },
+        { fr: "ROSE", en: "PINK", hex: "#FFC0CB" },
+        { fr: "MARRON", en: "BROWN", hex: "#8B4513" },
+        // Ajout des couleurs du niveau débutant
+        ...this.debutant
+    ],
+    // Niveau 3: Avancé (7+ ans) - Nuances et plus de choix
+    avance: [
+        { fr: "GRIS", en: "GRAY", hex: "#7F8C8D" },
+        { fr: "NOIR", en: "BLACK", hex: "#000000" },
+        { fr: "BLANC", en: "WHITE", hex: "#ECF0F1" },
+        { fr: "CYAN", en: "CYAN", hex: "#00FFFF" },
+        // Ajout des couleurs des niveaux précédents
+        ...this.intermediaire
+    ]
+};
 
-let couleurActuelleIndex = -1; // -1 pour l'état initial
+// --- 2. Variables d'État du Jeu ---
+let score = 0;
+let totalTentatives = 0;
+let couleurCible = null;
 
-const zoneAffichage = document.getElementById('zone-affichage');
-const nomCouleur = document.getElementById('nom-couleur');
+// --- 3. Références DOM ---
+const selectNiveau = document.getElementById('select-niveau');
+const selectLangue = document.getElementById('select-langue');
+const consigneTexte = document.getElementById('consigne-texte');
+const choixCouleursDiv = document.getElementById('choix-couleurs');
+const scoreSpan = document.getElementById('score');
+const feedbackMessage = document.getElementById('feedback-message');
+const sonSucces = document.getElementById('son-succes');
+const sonEchec = document.getElementById('son-echec');
 
-/**
- * Lit le nom de la couleur à haute voix en français.
- * @param {string} texte - Le mot à prononcer (ex: "ROUGE").
- */
-function prononcer(texte) {
+
+// --- 4. Fonctions Utilitaires ---
+
+/** Lit le texte à haute voix (TTS). */
+function prononcer(texte, langue) {
     if ('speechSynthesis' in window) {
-        // Crée une nouvelle instance de synthèse vocale
+        window.speechSynthesis.cancel(); // Arrête la parole précédente
         const utterance = new SpeechSynthesisUtterance(texte);
-        
-        // Tente de trouver une voix française
-        const voixFr = window.speechSynthesis.getVoices().find(v => v.lang.startsWith('fr'));
-        if (voixFr) {
-            utterance.voice = voixFr;
-        }
-        
-        utterance.lang = 'fr-FR';
-        utterance.rate = 0.9; // Vitesse légèrement ralentie pour les enfants
+        utterance.lang = (langue === 'en') ? 'en-US' : 'fr-FR';
+        utterance.rate = 0.9;
         window.speechSynthesis.speak(utterance);
-    } else {
-        console.log("La synthèse vocale n'est pas supportée par ce navigateur.");
     }
 }
 
-/**
- * Choisit une nouvelle couleur aléatoire et met à jour l'interface.
- */
-function changerCouleur() {
-    let nouvelIndex;
-    
-    // Assure que la nouvelle couleur n'est pas la même que la précédente (sauf si c'est la première fois)
-    do {
-        nouvelIndex = Math.floor(Math.random() * couleurs.length);
-    } while (nouvelIndex === couleurActuelleIndex);
-    
-    couleurActuelleIndex = nouvelIndex;
-    const couleur = couleurs[couleurActuelleIndex];
-
-    // 1. Mettre à jour l'affichage de la couleur
-    zoneAffichage.style.backgroundColor = couleur.hex;
-    
-    // 2. Mettre à jour le nom de la couleur
-    nomCouleur.textContent = couleur.nom;
-    nomCouleur.style.color = couleur.hex; // Le texte prend la couleur affichée pour l'emphase
-    
-    // 3. Prononcer le nom de la couleur
-    prononcer(couleur.nom);
+/** Joue l'effet sonore (placeholder: son-succes.mp3 ou son-echec.mp3). */
+function jouerSon(type) {
+    const audio = (type === 'succes') ? sonSucces : sonEchec;
+    // Vérifie et recharge si besoin, puis joue (pour les mobiles)
+    audio.currentTime = 0;
+    audio.play().catch(e => console.error("Erreur de lecture audio:", e));
 }
 
-// Initialisation de l'application au chargement
+/** Mélange un tableau de manière aléatoire (Algorithme de Fisher-Yates). */
+function melangerTableau(tableau) {
+    for (let i = tableau.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [tableau[i], tableau[j]] = [tableau[j], tableau[i]];
+    }
+    return tableau;
+}
+
+// --- 5. Logique Principale du Jeu ---
+
+/** Initialise ou réinitialise le jeu en fonction des sélections. */
+function initialiserJeu() {
+    score = 0;
+    totalTentatives = 0;
+    mettreAJourScore();
+    demarrerNouveauTour();
+}
+
+/** Met à jour l'affichage du score. */
+function mettreAJourScore() {
+    scoreSpan.textContent = `Score: ${score} / ${totalTentatives}`;
+}
+
+/** Génère un nouveau tour de jeu (choix de la couleur). */
+function demarrerNouveauTour() {
+    const niveau = selectNiveau.value;
+    const langue = selectLangue.value;
+    const listeCouleurs = couleursData[niveau];
+    
+    // 1. Définir le nombre d'options à afficher (max 4 pour débutant, 6 pour inter, 8 pour avancé)
+    const maxOptions = (niveau === 'debutant') ? 4 : (niveau === 'intermediaire' ? 6 : 8);
+    
+    // 2. Sélectionner la couleur cible
+    couleurCible = listeCouleurs[Math.floor(Math.random() * listeCouleurs.length)];
+
+    // 3. Sélectionner des options incorrectes uniques (Distracteurs)
+    let options = [couleurCible];
+    let couleursDisponibles = listeCouleurs.filter(c => c !== couleurCible);
+    couleursDisponibles = melangerTableau(couleursDisponibles);
+
+    for (let i = 0; options.length < maxOptions && i < couleursDisponibles.length; i++) {
+        options.push(couleursDisponibles[i]);
+    }
+
+    // 4. Mélanger toutes les options pour un ordre aléatoire
+    options = melangerTableau(options);
+
+    // 5. Afficher la consigne
+    const motCible = (langue === 'en') ? couleurCible.en : couleurCible.fr;
+    const consigneFr = `Trouve ${motCible} !`;
+    const consigneEn = `Find ${motCible} !`;
+    
+    consigneTexte.textContent = (langue === 'en') ? consigneEn : consigneFr;
+    consigneTexte.style.color = couleurCible.hex;
+    
+    // 6. Prononcer la consigne pour l'accessibilité
+    prononcer(motCible, langue);
+    
+    // 7. Générer les boutons de choix
+    genererOptions(options);
+    
+    // 8. Effacer le message de feedback
+    feedbackMessage.textContent = '';
+    feedbackMessage.className = '';
+}
+
+/** Génère les boutons de choix de couleur dans le DOM. */
+function genererOptions(options) {
+    choixCouleursDiv.innerHTML = '';
+    options.forEach(couleur => {
+        const bouton = document.createElement('div');
+        bouton.className = 'option-couleur';
+        bouton.style.backgroundColor = couleur.hex;
+        bouton.dataset.hex = couleur.hex;
+        bouton.onclick = () => verifierReponse(couleur.hex);
+        choixCouleursDiv.appendChild(bouton);
+    });
+}
+
+/** Vérifie la réponse du joueur. */
+function verifierReponse(hexChoisi) {
+    if (!couleurCible) return; // Empêche le clic si le jeu n'est pas initialisé
+
+    totalTentatives++;
+    
+    if (hexChoisi === couleurCible.hex) {
+        // Succès
+        score++;
+        feedbackMessage.textContent = (selectLangue.value === 'en') ? 'Correct! Well done!' : 'Bravo ! C\'est réussi !';
+        feedbackMessage.className = 'feedback-succes';
+        jouerSon('succes');
+    } else {
+        // Échec
+        feedbackMessage.textContent = (selectLangue.value === 'en') ? 'Try again!' : 'Essaie encore !';
+        feedbackMessage.className = 'feedback-echec';
+        jouerSon('echec');
+    }
+
+    mettreAJourScore();
+    
+    // Après un petit délai, passer au tour suivant
+    setTimeout(() => {
+        demarrerNouveauTour();
+    }, 1500); // Laisse le temps à l'enfant de voir le feedback
+}
+
+
+// --- 6. Initialisation ---
 document.addEventListener('DOMContentLoaded', () => {
-    // Demande au navigateur de charger les voix pour TTS (nécessaire pour certains)
+    // Pré-charge les voix TTS
     window.speechSynthesis.getVoices(); 
     
-    // Appel initial pour afficher la première couleur au démarrage
-    // Note: Pour des raisons d'autorisation, la prononciation est déclenchée
-    // uniquement sur une action de l'utilisateur (le clic/toucher).
-    // Nous laissons donc le message initial "Clique ici pour commencer !"
-    // et le premier appel à `changerCouleur` se fera sur le premier clic.
+    // Démarre le jeu avec les options par défaut
+    initialiserJeu();
 });
+
+// Assurez-vous que les sons sont disponibles (à créer : succes.mp3 et echec.mp3)
+// Pour les tests locaux, si les sons ne sont pas là, le `catch` empêchera l'erreur.

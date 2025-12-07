@@ -3,26 +3,46 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kôkô Couleurs - Apprendre les Couleurs</title>
+    <title>Kôkô Couleurs - Multilingue & Niveaux</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <header>
         <h1>🌈 Kôkô Couleurs</h1>
-        <p>Touche l'écran pour changer la couleur !</p>
+        <div id="controls">
+            <select id="select-niveau" onchange="initialiserJeu()">
+                <option value="debutant">Débutant (2-4 ans)</option>
+                <option value="intermediaire">Intermédiaire (5-6 ans)</option>
+                <option value="avance">Avancé (7+ ans)</option>
+            </select>
+            <select id="select-langue" onchange="initialiserJeu()">
+                <option value="fr">Français</option>
+                <option value="en">English</option>
+            </select>
+        </div>
     </header>
 
-    <main id="jeu-couleur" onclick="changerCouleur()">
-        <div id="zone-affichage">
-            </div>
-        <div id="nom-couleur-container">
-            <p id="nom-couleur">Clique ici pour commencer !</p>
+    <main>
+        <div id="score-container">
+            <span id="score">Score: 0 / 0</span>
         </div>
+        
+        <div id="zone-consigne">
+            <p id="consigne-texte">Cliquez sur une option pour commencer...</p>
+        </div>
+
+        <div id="choix-couleurs">
+            </div>
+
+        <div id="feedback-message"></div>
     </main>
 
     <footer>
-        <p>&copy; 2025 Fait avec amour pour les enfants de Côte d'Ivoire</p>
+        <p>&copy; 2025 Kôkô Couleurs</p>
     </footer>
+
+    <audio id="son-succes" src="succes.mp3"></audio>
+    <audio id="son-echec" src="echec.mp3"></audio>
 
     <script src="script.js"></script>
 </body>

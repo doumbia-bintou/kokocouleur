@@ -1,12 +1,12 @@
+/* --- Variables et Réinitialisation --- */
 :root {
-    /* Couleurs de base inspirées par les tons africains et les couleurs primaires */
-    --c-primaire: #FF5733; /* Orange vif */
-    --c-secondaire: #33A1FF; /* Bleu ciel */
-    --c-fond-clair: #F0F8FF; /* Blanc cassé pour le fond */
+    --c-primaire: #3498DB; /* Bleu vif */
+    --c-secondaire: #2ECC71; /* Vert succès */
+    --c-echec: #E74C3C; /* Rouge échec */
+    --c-fond-clair: #F0F8FF;
     --c-texte-fonce: #333333;
 }
 
-/* Réinitialisation de base */
 body {
     font-family: 'Arial', sans-serif;
     margin: 0;
@@ -19,85 +19,140 @@ body {
     min-height: 100vh;
 }
 
+/* --- En-tête et Contrôles --- */
 header {
     background-color: var(--c-primaire);
     color: white;
-    padding: 15px 0;
+    padding: 15px 10px;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
 h1 {
-    font-size: 2.5em; /* Grand titre pour l'attrait */
-    margin: 0;
-    text-shadow: 2px 2px var(--c-secondaire);
+    font-size: 2em;
+    margin-bottom: 10px;
 }
 
-p {
-    margin: 5px 0;
+#controls select {
+    padding: 8px 15px;
+    margin: 0 5px;
+    border-radius: 8px;
+    border: none;
+    font-size: 1em;
+    cursor: pointer;
+    background-color: white;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-/* Zone de Jeu Principale */
-#jeu-couleur {
-    flex-grow: 1; /* Prend l'espace restant */
+/* --- Zone de Jeu Principale --- */
+main {
+    flex-grow: 1;
+    padding: 20px;
     display: flex;
     flex-direction: column;
-    justify-content: center;
     align-items: center;
-    cursor: pointer; /* Indique l'interactivité */
-    transition: background-color 0.5s ease;
-    padding: 20px;
 }
 
-#zone-affichage {
-    width: 90%;
-    max-width: 600px;
-    height: 300px;
-    margin-bottom: 30px;
-    border-radius: 20px;
-    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
-    border: 5px solid var(--c-texte-fonce); /* Bordure épaisse pour un effet ludique */
-    transition: transform 0.2s ease;
+#score-container {
+    font-size: 1.2em;
+    font-weight: bold;
+    margin-bottom: 15px;
+    padding: 5px 15px;
+    border-radius: 10px;
+    background-color: #ffffff;
+    border: 2px solid var(--c-primaire);
 }
 
-/* Effet au survol/clic pour un retour visuel */
-#jeu-couleur:active #zone-affichage {
-    transform: scale(0.98);
-    box-shadow: 0 5px 10px rgba(0, 0, 0, 0.2);
-}
-
-/* Affichage du Nom de la Couleur */
-#nom-couleur-container {
+#zone-consigne {
     background-color: white;
-    padding: 15px 30px;
+    padding: 20px 40px;
     border-radius: 15px;
     box-shadow: 0 5px 15px rgba(0, 0, 0, 0.15);
-    border: 3px solid var(--c-primaire);
+    margin-bottom: 30px;
+    border: 4px solid var(--c-echec);
 }
 
-#nom-couleur {
-    font-size: 3em; /* Très grande taille pour la lisibilité par les petits */
-    font-weight: bold;
+#consigne-texte {
+    font-size: 3.5em; /* Très grand */
+    font-weight: 900;
     color: var(--c-texte-fonce);
     margin: 0;
 }
 
-/* Footer */
-footer {
-    background-color: var(--c-secondaire);
-    color: white;
-    padding: 10px 0;
-    font-size: 0.9em;
+/* --- Options de Couleur (Boutons) --- */
+#choix-couleurs {
+    display: flex;
+    flex-wrap: wrap; /* Pour gérer l'alignement sur mobile */
+    justify-content: center;
+    gap: 20px;
+    max-width: 800px;
 }
 
-/* Règle pour les petits écrans (téléphones) */
+.option-couleur {
+    width: 150px;
+    height: 150px;
+    border-radius: 50%; /* Bouton rond */
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+    cursor: pointer;
+    transition: transform 0.1s ease, opacity 0.3s ease;
+    border: 5px solid white; /* Bordure blanche pour contraste */
+}
+
+.option-couleur:hover {
+    transform: scale(1.05);
+}
+
+.option-couleur:active {
+    transform: scale(0.95);
+    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.2);
+}
+
+/* --- Feedback --- */
+#feedback-message {
+    margin-top: 20px;
+    font-size: 2em;
+    font-weight: bold;
+    min-height: 40px; /* Réserver de la place */
+}
+
+.feedback-succes {
+    color: var(--c-secondaire);
+    animation: bounceIn 0.5s;
+}
+
+.feedback-echec {
+    color: var(--c-echec);
+    animation: shake 0.5s;
+}
+
+/* Animations simples */
+@keyframes bounceIn {
+    0% { transform: scale(0); opacity: 0; }
+    50% { transform: scale(1.2); opacity: 1; }
+    100% { transform: scale(1); }
+}
+
+@keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    20%, 60% { transform: translateX(-10px); }
+    40%, 80% { transform: translateX(10px); }
+}
+
+/* --- Footer --- */
+footer {
+    background-color: var(--c-texte-fonce);
+    color: white;
+    padding: 10px 0;
+    font-size: 0.8em;
+    margin-top: auto;
+}
+
+/* Règle pour les petits écrans */
 @media (max-width: 600px) {
-    h1 {
-        font-size: 2em;
+    #consigne-texte {
+        font-size: 2.5em;
     }
-    #nom-couleur {
-        font-size: 2em;
-    }
-    #zone-affichage {
-        height: 200px;
+    .option-couleur {
+        width: 120px;
+        height: 120px;
     }
 }
